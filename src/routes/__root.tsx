@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
+import { supabase } from "../integrations/supabase/client";
 
 function NotFoundComponent() {
   return (
@@ -123,6 +124,33 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+
+  // Track unique page views (visitor count)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // Generate or retrieve unique visitor ID
+    let visitorId = localStorage.getItem("portfolio_visitor_id");
+    if (!visitorId) {
+      visitorId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      localStorage.setItem("portfolio_visitor_id", visitorId);
+    }
+
+    const path = router.state.location.pathname;
+
+    // Skip tracking admin panel or login routes to avoid dirtying stats
+    if (path.startsWith("/admin") || path.startsWith("/auth")) return;
+
+    supabase.from("page_views").insert({
+      url: path,
+      visitor_id: visitorId,
+    }).then(({ error }) => {
+      if (error) console.error("Error logging page view:", error);
+    });
+  }, [router.state.location.pathname]);
 
   return (
     <QueryClientProvider client={queryClient}>

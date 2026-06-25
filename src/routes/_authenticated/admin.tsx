@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Save, Trash2, LogOut, ArrowLeft, Pencil, X, Mail, Check, Inbox } from "lucide-react";
+import { Plus, Save, Trash2, LogOut, ArrowLeft, Pencil, X, Mail, Check, Inbox, Users, BarChart3 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings, useProjects, type Project, type SiteSettings } from "@/lib/portfolio-data";
 
@@ -36,6 +36,33 @@ function Admin() {
   });
   const isAdmin = (roleQ.data ?? []).includes("admin");
 
+  const statsQ = useQuery({
+    queryKey: ["visitor_stats"],
+    queryFn: async () => {
+      // Fetch total page views
+      const { count: totalViews } = await supabase
+        .from("page_views")
+        .select("*", { count: "exact", head: true });
+
+      // Fetch unique visitors
+      const { data: uniqueData } = await supabase
+        .from("page_views")
+        .select("visitor_id");
+
+      let uniqueVisitors = 0;
+      if (uniqueData) {
+        const uniqueSet = new Set(uniqueData.map((d: any) => d.visitor_id));
+        uniqueVisitors = uniqueSet.size;
+      }
+
+      return {
+        totalViews: totalViews ?? 0,
+        uniqueVisitors,
+      };
+    },
+    enabled: isAdmin,
+  });
+
   async function signOut() {
     await qc.cancelQueries();
     qc.clear();
@@ -66,6 +93,46 @@ function Admin() {
             Your account isn't an admin yet. Open the Cloud SQL console and run:{" "}
             <code className="font-mono-display bg-background px-1.5 py-0.5 rounded">INSERT INTO user_roles(user_id, role) VALUES ('{(roleQ.data === null) ? "<your-user-id>" : "auth.uid()"}', 'admin');</code>{" "}
             Then refresh.
+          </div>
+        )}
+
+        {isAdmin && (
+          <div className="grid sm:grid-cols-3 gap-5 mb-8">
+            <div className="rounded-2xl border border-border bg-background p-6 shadow-sm flex items-center justify-between">
+              <div>
+                <div className="text-xs text-muted-foreground uppercase tracking-wider font-mono-display">Unique Visitors</div>
+                <div className="font-display text-4xl mt-2 font-bold text-foreground">
+                  {statsQ.isLoading ? "..." : statsQ.data?.uniqueVisitors ?? 0}
+                </div>
+              </div>
+              <div className="grid h-12 w-12 place-items-center rounded-2xl bg-signal-soft text-signal">
+                <Users className="h-6 w-6" />
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-background p-6 shadow-sm flex items-center justify-between">
+              <div>
+                <div className="text-xs text-muted-foreground uppercase tracking-wider font-mono-display">Total Views</div>
+                <div className="font-display text-4xl mt-2 font-bold text-foreground">
+                  {statsQ.isLoading ? "..." : statsQ.data?.totalViews ?? 0}
+                </div>
+              </div>
+              <div className="grid h-12 w-12 place-items-center rounded-2xl bg-signal-soft text-signal">
+                <BarChart3 className="h-6 w-6" />
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-background p-6 shadow-sm flex items-center justify-between">
+              <div>
+                <div className="text-xs text-muted-foreground uppercase tracking-wider font-mono-display">Unread Messages</div>
+                <div className="font-display text-4xl mt-2 font-bold text-foreground">
+                  {unreadQ.isLoading ? "..." : unreadQ.data ?? 0}
+                </div>
+              </div>
+              <div className="grid h-12 w-12 place-items-center rounded-2xl bg-signal-soft text-signal">
+                <Inbox className="h-6 w-6" />
+              </div>
+            </div>
           </div>
         )}
 

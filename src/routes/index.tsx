@@ -14,17 +14,39 @@ import { sendContactEmailFn } from "@/lib/email-server";
 import { ThreeCanvas } from "@/components/ThreeCanvas";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Omkar Jadhav — Full-Stack & Flutter Developer · ByTech" },
-      { name: "description", content: "Portfolio of Omkar Jadhav — CS student, full-stack developer, Flutter developer, AI enthusiast and founder of ByTech. Building websites, mobile apps, AI software and digital products." },
-      { property: "og:title", content: "Omkar Jadhav — Full-Stack & Flutter Developer" },
-      { property: "og:description", content: "I build high-quality websites, mobile apps and AI-powered software. Available for freelance & collaboration." },
-      { property: "og:type", content: "website" },
-      { property: "og:image", content: portrait },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () => {
+    // Resolve absolute URL for OpenGraph and Twitter images
+    const ogImageUrl = portrait.startsWith("http") 
+      ? portrait 
+      : `https://codewithomkar.vercel.app${portrait}`;
+
+    return {
+      meta: [
+        { title: "Omkar Jadhav — Full-Stack & Flutter Developer | ByTech" },
+        { name: "description", content: "Developer portfolio of Omkar Jadhav — Computer Science student, Full-Stack developer, Flutter app developer, and founder of ByTech. Specializing in high-performance web applications, iOS/Android mobile apps, and custom AI agents." },
+        { name: "keywords", content: "Omkar Jadhav, CodeWithOmkar, ByTech, ByTech Softwares, Flutter Developer, Full Stack Developer, AI Agent Developer, Software Engineer, Mobile App Development, Pune, India, React Developer, Node.js" },
+        { name: "author", content: "Omkar Jadhav" },
+        { name: "robots", content: "index, follow" },
+        // Open Graph / Facebook
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: "https://codewithomkar.vercel.app/" },
+        { property: "og:title", content: "Omkar Jadhav — Full-Stack & Flutter Developer | ByTech" },
+        { property: "og:description", content: "Explore the developer portfolio of Omkar Jadhav, Founder of ByTech. Crafting clean web platforms, production-ready Flutter mobile apps, and intelligent AI integrations." },
+        { property: "og:image", content: ogImageUrl },
+        { property: "og:site_name", content: "Omkar Jadhav Portfolio" },
+        // Twitter
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:site", content: "@omkarjadhav1k" },
+        { name: "twitter:creator", content: "@omkarjadhav1k" },
+        { name: "twitter:title", content: "Omkar Jadhav — Full-Stack & Flutter Developer | ByTech" },
+        { name: "twitter:description", content: "Explore the developer portfolio of Omkar Jadhav, Founder of ByTech. Crafting clean web platforms, production-ready Flutter mobile apps, and intelligent AI integrations." },
+        { name: "twitter:image", content: ogImageUrl },
+      ],
+      links: [
+        { rel: "canonical", href: "https://codewithomkar.vercel.app/" },
+      ],
+    };
+  },
   component: Portfolio,
 });
 

@@ -34,6 +34,13 @@ function createSupabaseClient() {
   const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
 
   if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+    if (typeof window === "undefined") {
+      // Server-side: return a placeholder client to avoid throwing and crashing SSR.
+      // This allows the page to render with static defaults on first load, hydrating on client.
+      return createClient<Database>("https://placeholder.supabase.co", "sb_publishable_placeholder", {
+        auth: { persistSession: false }
+      });
+    }
     const missing = [
       ...(!SUPABASE_URL ? ['SUPABASE_URL'] : []),
       ...(!SUPABASE_PUBLISHABLE_KEY ? ['SUPABASE_PUBLISHABLE_KEY'] : []),

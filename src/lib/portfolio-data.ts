@@ -55,6 +55,11 @@ export function useSiteSettings() {
   return useQuery({
     queryKey: ["site_settings"],
     queryFn: async (): Promise<SiteSettings> => {
+      // Server-side: return static default settings immediately to prevent SSR crashes.
+      // The query will automatically re-fetch and hydrate on the client side.
+      if (typeof window === "undefined") {
+        return defaultSettings;
+      }
       const { data, error } = await supabase
         .from("site_settings")
         .select("*")
@@ -70,6 +75,10 @@ export function useProjects() {
   return useQuery({
     queryKey: ["projects"],
     queryFn: async (): Promise<Project[]> => {
+      // Server-side: return empty list immediately to prevent SSR crashes.
+      if (typeof window === "undefined") {
+        return [];
+      }
       const { data, error } = await supabase
         .from("projects")
         .select("*")

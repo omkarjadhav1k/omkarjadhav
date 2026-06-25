@@ -1,9 +1,0 @@
-# https://www.robotstxt.org/robotstxt.html
-User-agent: *
-Allow: /
-
-# Host
-Host: https://codewithomkar.vercel.app
-
-# Sitemap
-Sitemap: https://codewithomkar.vercel.app/sitemap.xml

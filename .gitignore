@@ -39,3 +39,4 @@ dist-ssr
 # Build and local files
 tsconfig.tsbuildinfo
 .workspace/
+.vercel/
